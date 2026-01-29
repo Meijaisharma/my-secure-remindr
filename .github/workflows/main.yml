@@ -31,16 +31,19 @@ jobs:
           npx cap add android || true
           npx cap sync
           
-          # Gradle build bina daemon ke
+          # Gradle memory aur lock issue fix
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon -Dorg.gradle.jvmargs="-Xmx2048m"
+          
+          # Force clean and build without daemon
+          ./gradlew assembleDebug --no-daemon --stacktrace -Dorg.gradle.jvmargs="-Xmx1024m -XX:MaxMetaspaceSize=256m"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Remindr-Secure-App
           path: android/app/build/outputs/apk/debug/*.apk
+          
           
           
           
