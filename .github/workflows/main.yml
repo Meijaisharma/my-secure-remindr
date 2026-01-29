@@ -22,7 +22,7 @@ jobs:
           npm install @capacitor/cli @capacitor/core @capacitor/android
           npm run build
 
-      - name: Build APK (Force Java 17)
+      - name: Build APK (Bypass System)
         run: |
           # Fresh configuration file
           echo '{"appId": "com.mejai.remindr", "appName": "Remindr", "webDir": "dist"}' > capacitor.config.json
@@ -31,21 +31,23 @@ jobs:
           npx cap add android || true
           npx cap sync
           
-          # Force compiler to use Java 17 and ignore version 21
+          # Gradle ko system folders se door rakhna
           cd android
           chmod +x gradlew
           
-          # Build command with forced compatibility
+          # Ye command Gradle ko majboor karegi ki wo server ki kisi bhi purani file ko na chhue
           ./gradlew assembleDebug --no-daemon \
+            --project-cache-dir="/tmp/gradle-cache-$(date +%s)" \
             -Dorg.gradle.jvmargs="-Xmx2048m" \
-            -Pandroid.compileOptions.sourceCompatibility=1.8 \
-            -Pandroid.compileOptions.targetCompatibility=1.8
+            -Dorg.gradle.parallel=false \
+            -Dorg.gradle.configureondemand=false
             
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Remindr-Secure-App
           path: android/app/build/outputs/apk/debug/*.apk
+          
           
           
           
