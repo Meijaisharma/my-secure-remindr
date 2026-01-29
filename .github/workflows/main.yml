@@ -22,31 +22,30 @@ jobs:
           npm install @capacitor/cli @capacitor/core @capacitor/android
           npm run build
 
-      - name: Build APK (Bypass System)
+      - name: Build APK (Force Zero Cache)
         run: |
-          # Fresh configuration file
+          # Sabse pehle configuration setup
           echo '{"appId": "com.mejai.remindr", "appName": "Remindr", "webDir": "dist"}' > capacitor.config.json
           
-          # Android setup
-          npx cap add android || true
+          # PURANA SAB DELETE KARNA (Taki error na aaye)
+          rm -rf android
+          rm -rf ~/.gradle/caches/
+          
+          # Naya Android platform add karna
+          npx cap add android
           npx cap sync
           
-          # Gradle ko system folders se door rakhna
+          # Final Build Command
           cd android
           chmod +x gradlew
-          
-          # Ye command Gradle ko majboor karegi ki wo server ki kisi bhi purani file ko na chhue
-          ./gradlew assembleDebug --no-daemon \
-            --project-cache-dir="/tmp/gradle-cache-$(date +%s)" \
-            -Dorg.gradle.jvmargs="-Xmx2048m" \
-            -Dorg.gradle.parallel=false \
-            -Dorg.gradle.configureondemand=false
-            
+          ./gradlew assembleDebug --no-daemon --no-build-cache -Dorg.gradle.jvmargs="-Xmx2048m"
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Remindr-Secure-App
+          name: Remindr-App-Final
           path: android/app/build/outputs/apk/debug/*.apk
+          
           
           
           
