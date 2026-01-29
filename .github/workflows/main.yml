@@ -15,26 +15,26 @@ jobs:
           npm install @capacitor/cli @capacitor/core @capacitor/android
           npm run build
 
-            - name: Build APK
+      - name: Build APK
         run: |
-          # Ek temporary config file banana taaki appId ka error na aaye
+          # Config file generate karna
           echo '{"appId": "com.mejai.remindr", "appName": "Remindr", "webDir": "dist"}' > capacitor.config.json
           
           # Android platform setup aur sync
           npx cap add android || true
           npx cap sync
           
-          # Permissions set karna aur APK compile karna
+          # Permissions aur APK compile
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
-          
+          ./gradlew clean assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Remindr-Secure-App
           path: android/app/build/outputs/apk/debug/*.apk
+          
           
           
           
