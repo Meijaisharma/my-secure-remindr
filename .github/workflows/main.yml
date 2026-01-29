@@ -1,16 +1,15 @@
-name: Build Android APK
+name: Build PathshalaX Style APK
 on: [push, workflow_dispatch]
 jobs:
   build:
-    # Environment badal rahe hain taaki purana cache khatam ho jaye
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       
-      - name: set up JDK 17
+      - name: set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin'
 
       - name: Setup Node
@@ -24,27 +23,22 @@ jobs:
 
       - name: Build Android APK
         run: |
-          # Capacitor CLI ko manually install karna taaki executable mil sake
-          npm install @capacitor/cli @capacitor/core @capacitor/android
+          # Sirf ye line add ki hai taaki 'executable' wala error na aaye
+          npm install @capacitor/cli @capacitor/android
           
-          # Fresh config file
+          # Baaki sab pichli baar jaisa hi hai
           echo '{"appId": "com.mejai.remindr", "appName": "Remindr", "webDir": "dist"}' > capacitor.config.json
-          
-          # Sab kuch naye sire se banana
-          rm -rf android
-          npx cap add android
+          npx cap add android || true
           npx cap sync
           
-          # Final Build bina kisi purane kachre ke
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --no-build-cache
-          
+          cd android && chmod +x gradlew && ./gradlew assembleDebug
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Remindr-App-Final
           path: android/app/build/outputs/apk/debug/*.apk
+          
           
           
           
