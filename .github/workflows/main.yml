@@ -5,13 +5,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
-          cache: 'gradle'
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -25,25 +24,24 @@ jobs:
 
       - name: Build APK
         run: |
-          # Config file ko pehle hi sahi format mein banana
+          # Sahi configuration file banana
           echo '{"appId": "com.mejai.remindr", "appName": "Remindr", "webDir": "dist"}' > capacitor.config.json
           
-          # Android platform setup aur sync
+          # Android setup
           npx cap add android || true
           npx cap sync
           
-          # Gradle permissions aur memory fix
+          # Gradle build bina daemon ke
           cd android
           chmod +x gradlew
-          
-          # Build command with forced memory limits
-          ./gradlew clean assembleDebug -Dorg.gradle.jvmargs="-Xmx2048m" -Dorg.gradle.daemon=false
+          ./gradlew assembleDebug --no-daemon -Dorg.gradle.jvmargs="-Xmx2048m"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Remindr-Secure-App
           path: android/app/build/outputs/apk/debug/*.apk
+          
           
           
           
