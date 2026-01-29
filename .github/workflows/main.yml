@@ -2,19 +2,20 @@ name: Build Android APK
 on: [push]
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Purane server ko chhod kar naya Ubuntu version use kar rahe hain
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: '17'
 
       - name: Setup Node
         uses: actions/setup-node@v4
-        with: {node-version: 18}
+        with: {node-version: 20}
       
       - name: Install Dependencies
         run: |
@@ -22,29 +23,26 @@ jobs:
           npm install @capacitor/cli @capacitor/core @capacitor/android
           npm run build
 
-      - name: Build APK (Force Clean)
+      - name: Build APK (Fresh VM)
         run: |
-          # Sabse pehle purani sari kharab files delete karna
-          rm -rf android/capacitor-cordova-android-plugins
-          rm -rf ~/.gradle/caches/
-          
-          # Nayi configuration file
+          # Sahi configuration file
           echo '{"appId": "com.mejai.remindr", "appName": "Remindr", "webDir": "dist"}' > capacitor.config.json
           
-          # Android setup bina cache ke
+          # Android setup
           npx cap add android || true
           npx cap sync
           
-          # Final Build Command
+          # Final Build Command bina daemon aur bina purane cache ke
           cd android
           chmod +x gradlew
-          ./gradlew clean assembleDebug --no-daemon -Dorg.gradle.jvmargs="-Xmx1536m"
+          ./gradlew assembleDebug --no-daemon --no-build-cache -Dorg.gradle.jvmargs="-Xmx2048m"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Remindr-Secure-App
           path: android/app/build/outputs/apk/debug/*.apk
+          
           
           
           
