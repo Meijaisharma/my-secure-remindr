@@ -14,7 +14,7 @@ jobs:
 
       - name: Setup Node
         uses: actions/setup-node@v4
-        with: {node-version: 18}
+        with: {node-version: 20}
       
       - name: Install Dependencies
         run: |
@@ -22,26 +22,27 @@ jobs:
           npm install @capacitor/cli @capacitor/core @capacitor/android
           npm run build
 
-      - name: Build APK (Bypass Cache)
+      - name: Build APK (Zero-Cache Mode)
         run: |
-          # Fresh configuration file
+          # Sabse pehle configuration setup
           echo '{"appId": "com.mejai.remindr", "appName": "Remindr", "webDir": "dist"}' > capacitor.config.json
           
-          # Android setup
-          npx cap add android || true
+          # Android platform ko naye sire se banana (No reuse)
+          rm -rf android
+          npx cap add android
           npx cap sync
           
-          # Gradle Build: Yahan humne project-cache-dir ko change kar diya hai 
-          # taaki server purani corrupt files dhoond hi na paye
+          # Gradle ko force karna ki wo system cache use na kare
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --project-cache-dir="../.gradle-new" -Dorg.gradle.jvmargs="-Xmx2048m"
+          ./gradlew assembleDebug --no-daemon --no-build-cache --project-cache-dir="/tmp/gradle-$(date +%s)" -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=512m"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Remindr-Secure-App
           path: android/app/build/outputs/apk/debug/*.apk
+          
           
           
           
