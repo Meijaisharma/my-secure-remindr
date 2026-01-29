@@ -22,25 +22,30 @@ jobs:
           npm install @capacitor/cli @capacitor/core @capacitor/android
           npm run build
 
-      - name: Build APK
+      - name: Build APK (Force Clean)
         run: |
-          # Sahi configuration file banana
+          # Sabse pehle purani sari kharab files delete karna
+          rm -rf android/capacitor-cordova-android-plugins
+          rm -rf ~/.gradle/caches/
+          
+          # Nayi configuration file
           echo '{"appId": "com.mejai.remindr", "appName": "Remindr", "webDir": "dist"}' > capacitor.config.json
           
           # Android setup bina cache ke
           npx cap add android || true
           npx cap sync
           
-          # Gradle build: Isme humne daemon band kiya hai aur memory fix ki hai
+          # Final Build Command
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --no-build-cache -Dorg.gradle.jvmargs="-Xmx1024m"
+          ./gradlew clean assembleDebug --no-daemon -Dorg.gradle.jvmargs="-Xmx1536m"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Remindr-Secure-App
           path: android/app/build/outputs/apk/debug/*.apk
+          
           
           
           
