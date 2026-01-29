@@ -2,11 +2,11 @@ name: Build Android APK
 on: [push]
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Java 17
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
@@ -22,25 +22,27 @@ jobs:
           npm install @capacitor/cli @capacitor/core @capacitor/android
           npm run build
 
-      - name: Build APK
+      - name: Build APK (Bypass Cache)
         run: |
-          # Fresh config file banana
+          # Fresh configuration file
           echo '{"appId": "com.mejai.remindr", "appName": "Remindr", "webDir": "dist"}' > capacitor.config.json
           
           # Android setup
           npx cap add android || true
           npx cap sync
           
-          # Gradle build with Java 17 compatibility
+          # Gradle Build: Yahan humne project-cache-dir ko change kar diya hai 
+          # taaki server purani corrupt files dhoond hi na paye
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --no-build-cache -Dorg.gradle.java.home=$JAVA_HOME_17_X64
+          ./gradlew assembleDebug --no-daemon --project-cache-dir="../.gradle-new" -Dorg.gradle.jvmargs="-Xmx2048m"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Remindr-Secure-App
           path: android/app/build/outputs/apk/debug/*.apk
+          
           
           
           
