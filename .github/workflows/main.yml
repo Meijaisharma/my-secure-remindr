@@ -6,7 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Java
+      - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
@@ -14,7 +14,7 @@ jobs:
 
       - name: Setup Node
         uses: actions/setup-node@v4
-        with: {node-version: 20}
+        with: {node-version: 18}
       
       - name: Install Dependencies
         run: |
@@ -22,26 +22,31 @@ jobs:
           npm install @capacitor/cli @capacitor/core @capacitor/android
           npm run build
 
-      - name: Build APK (Zero-Cache Mode)
+      - name: Build APK (Force Java 17)
         run: |
-          # Sabse pehle configuration setup
+          # Fresh configuration file
           echo '{"appId": "com.mejai.remindr", "appName": "Remindr", "webDir": "dist"}' > capacitor.config.json
           
-          # Android platform ko naye sire se banana (No reuse)
-          rm -rf android
-          npx cap add android
+          # Android setup
+          npx cap add android || true
           npx cap sync
           
-          # Gradle ko force karna ki wo system cache use na kare
+          # Force compiler to use Java 17 and ignore version 21
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --no-build-cache --project-cache-dir="/tmp/gradle-$(date +%s)" -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=512m"
-
+          
+          # Build command with forced compatibility
+          ./gradlew assembleDebug --no-daemon \
+            -Dorg.gradle.jvmargs="-Xmx2048m" \
+            -Pandroid.compileOptions.sourceCompatibility=1.8 \
+            -Pandroid.compileOptions.targetCompatibility=1.8
+            
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Remindr-Secure-App
           path: android/app/build/outputs/apk/debug/*.apk
+          
           
           
           
