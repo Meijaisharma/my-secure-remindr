@@ -1,4 +1,4 @@
-name: Final Force APK Build
+name: Super Clean Build
 on: [push, workflow_dispatch]
 jobs:
   build:
@@ -16,34 +16,31 @@ jobs:
         uses: actions/setup-node@v4
         with: {node-version: 18}
 
-      - name: Install and Build Web
+      - name: Force Clean Everything
         run: |
           npm install
-          # Agar 'dist' folder pehle se hai toh delete karke naya banayein
-          rm -rf dist
+          rm -rf dist android # Purana build folder delete karein
           npm run build
 
       - name: Build Android APK
         run: |
-          # 1. Capacitor install karein
-          npm install @capacitor/cli @capacitor/android @capacitor/core
-          
-          # 2. Force configuration setup (Sabse badi galti yahi hoti hai)
-          echo '{"appId": "com.mejai.remindr", "appName": "Remindr", "webDir": "dist", "bundledWebRuntime": false}' > capacitor.config.json
-          
-          # 3. Android folder check aur sync
-          # Agar android folder nahi hai toh add karein, hai toh sync karein
-          npx cap add android || true
+          npm install @capacitor/cli @capacitor/android
+          # Config file naye sire se banayein
+          echo '{"appId": "com.mejai.remindr", "appName": "Remindr", "webDir": "dist"}' > capacitor.config.json
+          npx cap add android
           npx cap sync android
           
-          # 4. Permissions aur Gradle Fix
           cd android
           chmod +x gradlew
-          # Sabse zaroori: Purana cache saaf karke fresh build shuru karein
+          # Sabse zaroori: Purana cache saaf karke fresh build
           ./gradlew clean assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
+        with:
+          name: Remindr-App-Success
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          
         
           
           
