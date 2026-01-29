@@ -8,18 +8,27 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with: {node-version: 18}
-      - name: Install and Build
+      
+      - name: Install Dependencies
         run: |
           npm install
+          # Capacitor CLI ko install karna zaroori hai
+          npm install @capacitor/cli @capacitor/core @capacitor/android
           npm run build
+
       - name: Build APK
         run: |
-          npx cap add android || true
+          # Agar android folder nahi hai toh add karein
+          if [ ! -d "android" ]; then
+            npx cap add android
+          fi
           npx cap sync
           cd android && ./gradlew assembleDebug
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Remindr-Secure-App
           path: android/app/build/outputs/apk/debug/*.apk
+          
           
