@@ -1,3 +1,20 @@
+name: Build Android APK
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with: {node-version: 18}
+      
+      - name: Install Dependencies
+        run: |
+          npm install
+          npm install @capacitor/cli @capacitor/core @capacitor/android
+          npm run build
+
       - name: Build APK
         run: |
           # Ek temporary config file banana taaki appId ka error na aaye
@@ -9,6 +26,14 @@
           
           # APK compile karna
           cd android && ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Remindr-Secure-App
+          path: android/app/build/outputs/apk/debug/*.apk
+          
+          
           
           
           
