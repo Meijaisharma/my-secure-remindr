@@ -23,7 +23,7 @@ jobs:
 
       - name: Build Android APK
         run: |
-          # Sirf ye line add ki hai taaki 'executable' wala error na aaye
+          # Sirf ye line add ki hai taaki 'executable not found' error na aaye
           npm install @capacitor/cli @capacitor/android
           
           # Baaki sab pichli baar jaisa hi hai
@@ -31,13 +31,15 @@ jobs:
           npx cap add android || true
           npx cap sync
           
-          cd android && chmod +x gradlew && ./gradlew assembleDebug
+          # Force clean build taaki cache error na aaye
+          cd android && chmod +x gradlew && ./gradlew clean assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Remindr-App-Final
           path: android/app/build/outputs/apk/debug/*.apk
+          
           
           
           
